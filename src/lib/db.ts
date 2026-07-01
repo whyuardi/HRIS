@@ -36,7 +36,13 @@ function setStorageItem<T>(key: string, value: T): void {
 export function initDb() {
   if (!isClient) return;
   if (!localStorage.getItem('hr_employees')) {
-    localStorage.setItem('hr_employees', JSON.stringify(initialEmployees));
+    const listWithBank = initialEmployees.map((e, idx) => ({
+      ...e,
+      bankName: ['BCA', 'Mandiri', 'BNI', 'BRI'][idx % 4],
+      bankAccount: `8720${Math.floor(100000 + Math.random() * 900000)}`,
+      bankAccountName: e.name,
+    }));
+    localStorage.setItem('hr_employees', JSON.stringify(listWithBank));
   }
   if (!localStorage.getItem('hr_attendance')) {
     localStorage.setItem('hr_attendance', JSON.stringify(initialAttendance));
@@ -55,7 +61,24 @@ export function initDb() {
 // --- Employees API ---
 export function dbGetEmployees(): Employee[] {
   initDb();
-  return getStorageItem<Employee[]>('hr_employees', initialEmployees);
+  const rawList = getStorageItem<Employee[]>('hr_employees', initialEmployees);
+  let changed = false;
+  const migrated = rawList.map((e, idx) => {
+    if (e.bankName === undefined || e.bankAccount === undefined || e.bankAccountName === undefined) {
+      changed = true;
+      return {
+        ...e,
+        bankName: e.bankName || ['BCA', 'Mandiri', 'BNI', 'BRI'][idx % 4],
+        bankAccount: e.bankAccount || `8720${Math.floor(100000 + Math.random() * 900000)}`,
+        bankAccountName: e.bankAccountName || e.name,
+      };
+    }
+    return e;
+  });
+  if (changed) {
+    setStorageItem('hr_employees', migrated);
+  }
+  return migrated;
 }
 
 export function dbSaveEmployee(employee: Employee): void {

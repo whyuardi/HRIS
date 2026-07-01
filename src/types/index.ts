@@ -46,6 +46,9 @@ export interface Employee {
   contractEnd: string;
   bpjs: boolean;
   salary: number;
+  bankName?: string;
+  bankAccount?: string;
+  bankAccountName?: string;
 }
 
 export interface JobHistory {

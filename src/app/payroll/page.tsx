@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { dbGetPayroll, dbSavePayroll, dbGeneratePayroll } from '@/lib/db';
+import { dbGetPayroll, dbSavePayroll, dbGeneratePayroll, dbGetEmployees } from '@/lib/db';
 import { divisions } from '@/lib/data/divisions';
 import { PageHeader } from '@/components/shared/page-header';
 import { StatusBadge } from '@/components/shared/status-badge';
@@ -68,11 +68,22 @@ export default function PayrollPage() {
     const item = list.find(r => r.id === id);
     if (!item) return;
 
-    item.status = 'paid';
-    item.transferDate = new Date().toISOString().split('T')[0];
+    // Fetch employee bank details
+    const emps = dbGetEmployees();
+    const emp = emps.find(e => e.id === item.employeeId);
 
-    dbSavePayroll(item);
-    setPayrollList(dbGetPayroll());
+    const bankDetails = emp 
+      ? `\n\nTransfer dikirim ke:\nBank: ${emp.bankName}\nNo. Rekening: ${emp.bankAccount}\na.n. ${emp.bankAccountName}`
+      : '\n\nTransfer dikirim ke rekening default karyawan.';
+
+    if (confirm(`Apakah Anda yakin ingin memproses pembayaran gaji sebesar ${formatCurrency(item.netSalary)} untuk ${item.employeeName}?${bankDetails}`)) {
+      item.status = 'paid';
+      item.transferDate = new Date().toISOString().split('T')[0];
+
+      dbSavePayroll(item);
+      setPayrollList(dbGetPayroll());
+      alert(`Pembayaran Gaji Sukses!${bankDetails}`);
+    }
   };
 
   const filteredData = useMemo(() => {

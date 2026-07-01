@@ -49,6 +49,9 @@ export default function EmployeesPage() {
     status: 'active' as EmployeeStatus,
     contractStatus: 'contract' as ContractStatus,
     salary: '10000000',
+    bankName: 'BCA',
+    bankAccount: '',
+    bankAccountName: '',
   });
 
   // Load employees from LocalStorage
@@ -100,6 +103,9 @@ export default function EmployeesPage() {
       contractEnd: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
       bpjs: true,
       salary: Number(newEmp.salary) || 8000000,
+      bankName: newEmp.bankName || 'BCA',
+      bankAccount: newEmp.bankAccount || '',
+      bankAccountName: newEmp.bankAccountName || newEmp.name,
     };
 
     dbSaveEmployee(employee);
@@ -119,6 +125,9 @@ export default function EmployeesPage() {
       status: 'active',
       contractStatus: 'contract',
       salary: '10000000',
+      bankName: 'BCA',
+      bankAccount: '',
+      bankAccountName: '',
     });
   };
 
@@ -216,7 +225,33 @@ export default function EmployeesPage() {
               </div>
               <div className="space-y-2 col-span-2">
                 <Label htmlFor="address" className="text-xs">Alamat</Label>
-                <Textarea id="address" placeholder="Alamat lengkap tempat tinggal..." value={newEmp.address} onChange={(e) => setNewEmp({ ...newEmp, address: e.target.value })} className="text-sm min-h-[60px]" />
+                <Textarea id="address" placeholder="Alamat lengkap tempat tinggal..." value={newEmp.address} onChange={(e) => setNewEmp({ ...newEmp, address: e.target.value })} className="text-sm min-h-[40px]" />
+              </div>
+              
+              <div className="col-span-2 text-xs font-semibold uppercase tracking-wider text-gray-500 pt-2 border-t border-gray-100 dark:border-gray-800">
+                Informasi Rekening Bank
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="bankName" className="text-xs">Nama Bank</Label>
+                <Select value={newEmp.bankName} onValueChange={(v) => v && setNewEmp({ ...newEmp, bankName: v })}>
+                  <SelectTrigger className="h-9 text-sm">
+                    <SelectValue placeholder="Pilih Bank" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="BCA">BCA</SelectItem>
+                    <SelectItem value="Mandiri">Mandiri</SelectItem>
+                    <SelectItem value="BNI">BNI</SelectItem>
+                    <SelectItem value="BRI">BRI</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="bankAccount" className="text-xs">Nomor Rekening</Label>
+                <Input id="bankAccount" placeholder="Contoh: 8720123456" value={newEmp.bankAccount} onChange={(e) => setNewEmp({ ...newEmp, bankAccount: e.target.value })} className="h-9 text-sm" />
+              </div>
+              <div className="space-y-2 col-span-2">
+                <Label htmlFor="bankAccountName" className="text-xs">Nama Pemilik Rekening</Label>
+                <Input id="bankAccountName" placeholder="Nama sesuai buku tabungan" value={newEmp.bankAccountName} onChange={(e) => setNewEmp({ ...newEmp, bankAccountName: e.target.value })} className="h-9 text-sm" />
               </div>
             </div>
             <DialogFooter>

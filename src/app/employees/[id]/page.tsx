@@ -18,7 +18,7 @@ import {
 } from '@/components/ui/table';
 import {
   ArrowLeft, Mail, Phone, MapPin, Calendar, Building2, Briefcase,
-  FileCheck, Download, Eye, TrendingUp,
+  FileCheck, Download, Eye, TrendingUp, CreditCard,
 } from 'lucide-react';
 
 export default function EmployeeDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -158,6 +158,30 @@ export default function EmployeeDetailPage({ params }: { params: Promise<{ id: s
                       Rp {employee.salary.toLocaleString('id-ID')}
                     </p>
                   </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="border-gray-200 dark:border-gray-800 lg:col-span-2">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                  <CreditCard className="w-4 h-4 text-green-600" /> Informasi Rekening Bank
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {[
+                    { label: 'Nama Bank', value: employee.bankName },
+                    { label: 'Nomor Rekening', value: employee.bankAccount, highlight: true },
+                    { label: 'Nama Pemilik Rekening', value: employee.bankAccountName },
+                  ].map(item => (
+                    <div key={item.label} className="space-y-1">
+                      <p className="text-[11px] text-gray-500 uppercase tracking-wider">{item.label}</p>
+                      <p className={`text-sm ${item.highlight ? 'font-mono font-semibold text-green-600 dark:text-green-400' : 'font-medium text-gray-900 dark:text-white'}`}>
+                        {item.value || '—'}
+                      </p>
+                    </div>
+                  ))}
                 </div>
               </CardContent>
             </Card>
