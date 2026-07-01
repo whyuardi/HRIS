@@ -2,13 +2,16 @@
 
 import { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { todayAttendance, getAttendanceSummary, monthlyAttendanceStats } from '@/lib/data/attendance';
+import { todayAttendance, monthlyAttendanceStats } from '@/lib/data/attendance';
 import { divisions } from '@/lib/data/divisions';
+import { employees } from '@/lib/data/employees';
 import { PageHeader } from '@/components/shared/page-header';
 import { StatusBadge } from '@/components/shared/status-badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
@@ -16,16 +19,48 @@ import {
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogTrigger
+} from '@/components/ui/dialog';
 import { AttendanceChart } from '@/components/charts/attendance-chart';
 import {
-  Search, Download, Clock, UserCheck, AlertTriangle, Home, CalendarOff, FileWarning, Filter,
+  Search, Download, Clock, UserCheck, AlertTriangle, Home, CalendarOff, FileWarning, Filter, ClipboardList,
 } from 'lucide-react';
+import { AttendanceStatus } from '@/types';
 
 export default function AttendancePage() {
   const [search, setSearch] = useState('');
   const [divisionFilter, setDivisionFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
-  const summary = getAttendanceSummary();
+
+  // Interactive local state for attendance list
+  const [attendanceList, setAttendanceList] = useState(todayAttendance);
+
+  // Dialog input states
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [selectedEmpId, setSelectedEmpId] = useState('');
+  const [checkInTime, setCheckInTime] = useState('08:00');
+  const [checkOutTime, setCheckOutTime] = useState('17:00');
+  const [attStatus, setAttStatus] = useState<AttendanceStatus>('hadir');
+  const [attNote, setAttNote] = useState('');
+
+  // Only allow check-in for active/probation employees
+  const activeEmployees = useMemo(() => {
+    return employees.filter(e => e.status === 'active' || e.status === 'probation');
+  }, []);
+
+  // Compute live statistics based on state
+  const summary = useMemo(() => {
+    return {
+      total: attendanceList.length,
+      hadir: attendanceList.filter(a => a.status === 'hadir').length,
+      terlambat: attendanceList.filter(a => a.status === 'terlambat').length,
+      wfh: attendanceList.filter(a => a.status === 'wfh').length,
+      izin: attendanceList.filter(a => a.status === 'izin').length,
+      cuti: attendanceList.filter(a => a.status === 'cuti').length,
+      tidak_hadir: attendanceList.filter(a => a.status === 'tidak_hadir').length,
+    };
+  }, [attendanceList]);
 
   const stats = [
     { label: 'Total', value: summary.total, icon: UserCheck, color: 'bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400' },
@@ -38,24 +73,151 @@ export default function AttendancePage() {
   ];
 
   const filteredData = useMemo(() => {
-    return todayAttendance.filter(att => {
+    return attendanceList.filter(att => {
       const matchSearch = search === '' ||
         att.employeeName.toLowerCase().includes(search.toLowerCase());
       const matchDivision = divisionFilter === 'all' || att.division === divisions.find(d => d.id === divisionFilter)?.name;
       const matchStatus = statusFilter === 'all' || att.status === statusFilter;
       return matchSearch && matchDivision && matchStatus;
     });
-  }, [search, divisionFilter, statusFilter]);
+  }, [search, divisionFilter, statusFilter, attendanceList]);
+
+  // Handle Save/Submit Attendance
+  const handleSaveAttendance = () => {
+    if (!selectedEmpId) return;
+
+    const emp = employees.find(e => e.id === selectedEmpId);
+    if (!emp) return;
+
+    const existingIdx = attendanceList.findIndex(a => a.employeeId === selectedEmpId);
+
+    const hasTime = attStatus !== 'tidak_hadir' && attStatus !== 'cuti' && attStatus !== 'izin';
+    const computedCheckIn = hasTime ? checkInTime : null;
+    const computedCheckOut = hasTime && attStatus !== 'wfh' ? checkOutTime : (attStatus === 'wfh' ? '17:00' : null);
+
+    let computedWorkHours = 0;
+    if (hasTime) {
+      const [inH, inM] = checkInTime.split(':').map(Number);
+      const [outH, outM] = checkOutTime.split(':').map(Number);
+      computedWorkHours = Math.max(0, (outH + outM / 60) - (inH + inM / 60));
+    }
+
+    const newRecord = {
+      id: existingIdx >= 0 ? attendanceList[existingIdx].id : `att-${Date.now()}`,
+      employeeId: emp.id,
+      employeeName: emp.name,
+      division: emp.division,
+      date: new Date().toISOString().split('T')[0],
+      checkIn: computedCheckIn,
+      checkOut: computedCheckOut,
+      workHours: Math.round(computedWorkHours * 10) / 10,
+      status: attStatus,
+      note: attNote || (attStatus === 'wfh' ? 'Work from home' : ''),
+    };
+
+    if (existingIdx >= 0) {
+      const updated = [...attendanceList];
+      updated[existingIdx] = newRecord;
+      setAttendanceList(updated);
+    } else {
+      setAttendanceList([newRecord, ...attendanceList]);
+    }
+
+    // Reset fields
+    setSelectedEmpId('');
+    setCheckInTime('08:00');
+    setCheckOutTime('17:00');
+    setAttStatus('hadir');
+    setAttNote('');
+    setIsDialogOpen(false);
+  };
 
   return (
     <div className="space-y-6">
       <PageHeader
         title="Absensi"
-        description="Monitoring kehadiran karyawan hari ini"
+        description="Monitoring & pencatatan kehadiran karyawan hari ini"
       >
         <Button variant="outline" size="sm" className="gap-2 text-xs">
           <Download className="w-4 h-4" /> Export
         </Button>
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogTrigger className="inline-flex items-center justify-center gap-2 rounded-lg text-xs font-medium h-9 px-3 bg-green-600 hover:bg-green-700 text-white transition-colors cursor-pointer">
+            <ClipboardList className="w-4 h-4" /> Input Absensi
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Input Kehadiran Karyawan</DialogTitle>
+              <DialogDescription>
+                Catat absensi masuk/pulang, dinas, cuti, atau izin untuk karyawan hari ini.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-3">
+              <div className="space-y-2">
+                <Label htmlFor="employee" className="text-xs">Pilih Karyawan</Label>
+                <Select value={selectedEmpId} onValueChange={(v) => v && setSelectedEmpId(v)}>
+                  <SelectTrigger className="h-9 text-sm">
+                    <SelectValue placeholder="Pilih Karyawan..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {activeEmployees.map(emp => (
+                      <SelectItem key={emp.id} value={emp.id}>{emp.name} ({emp.nik})</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="status" className="text-xs">Status Kehadiran</Label>
+                  <Select value={attStatus} onValueChange={(v) => v && setAttStatus(v as AttendanceStatus)}>
+                    <SelectTrigger className="h-9 text-sm">
+                      <SelectValue placeholder="Pilih Status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="hadir">Hadir</SelectItem>
+                      <SelectItem value="terlambat">Terlambat</SelectItem>
+                      <SelectItem value="wfh">WFH</SelectItem>
+                      <SelectItem value="izin">Izin</SelectItem>
+                      <SelectItem value="cuti">Cuti</SelectItem>
+                      <SelectItem value="tidak_hadir">Tidak Hadir</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="date" className="text-xs">Tanggal</Label>
+                  <Input id="date" type="text" readOnly defaultValue={new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })} className="h-9 text-sm bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-800" />
+                </div>
+              </div>
+
+              {attStatus !== 'tidak_hadir' && attStatus !== 'cuti' && attStatus !== 'izin' && (
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="checkIn" className="text-xs">Jam Masuk</Label>
+                    <Input id="checkIn" type="time" value={checkInTime} onChange={(e) => setCheckInTime(e.target.value)} className="h-9 text-sm" />
+                  </div>
+                  {attStatus !== 'wfh' && (
+                    <div className="space-y-2">
+                      <Label htmlFor="checkOut" className="text-xs">Jam Pulang</Label>
+                      <Input id="checkOut" type="time" value={checkOutTime} onChange={(e) => setCheckOutTime(e.target.value)} className="h-9 text-sm" />
+                    </div>
+                  )}
+                </div>
+              )}
+
+              <div className="space-y-2">
+                <Label htmlFor="note" className="text-xs">Keterangan / Catatan</Label>
+                <Textarea id="note" placeholder="Alasan terlambat, detail izin/cuti..." value={attNote} onChange={(e) => setAttNote(e.target.value)} className="text-sm min-h-[80px]" />
+              </div>
+            </div>
+            <DialogFooter>
+              <div className="flex gap-2 w-full">
+                <Button variant="outline" className="flex-1 text-xs" onClick={() => setIsDialogOpen(false)}>Batal</Button>
+                <Button className="flex-1 text-xs bg-green-600 hover:bg-green-700 text-white" disabled={!selectedEmpId} onClick={handleSaveAttendance}>Simpan Kehadiran</Button>
+              </div>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </PageHeader>
 
       {/* Stats Cards */}
