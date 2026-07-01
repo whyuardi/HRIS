@@ -36,15 +36,15 @@ export default function SettingsPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="companyName" className="text-xs">Nama Perusahaan</Label>
-                <Input id="companyName" defaultValue="PT. Nusantara Digital Teknologi" className="h-9 text-sm" />
+                <Input id="companyName" defaultValue="PT. Benua Green Energy" className="h-9 text-sm" />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="companyCode" className="text-xs">Kode Perusahaan</Label>
-                <Input id="companyCode" defaultValue="NDT" className="h-9 text-sm" />
+                <Input id="companyCode" defaultValue="BGE" className="h-9 text-sm" />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-xs flex items-center gap-1.5"><Mail className="w-3 h-3" /> Email</Label>
-                <Input id="email" defaultValue="hrd@nusantaradigital.co.id" className="h-9 text-sm" />
+                <Input id="email" defaultValue="hrd@benuagreenenergy.co.id" className="h-9 text-sm" />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="phone" className="text-xs flex items-center gap-1.5"><Phone className="w-3 h-3" /> Telepon</Label>
@@ -52,7 +52,7 @@ export default function SettingsPage() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="website" className="text-xs flex items-center gap-1.5"><Globe className="w-3 h-3" /> Website</Label>
-                <Input id="website" defaultValue="https://nusantaradigital.co.id" className="h-9 text-sm" />
+                <Input id="website" defaultValue="https://benuagreenenergy.co.id" className="h-9 text-sm" />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="npwp" className="text-xs">NPWP</Label>

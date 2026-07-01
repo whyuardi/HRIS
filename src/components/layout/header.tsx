@@ -7,7 +7,7 @@ import { format } from 'date-fns';
 import { id as localeId } from 'date-fns/locale';
 import { useSidebar } from '@/hooks/use-sidebar';
 import { notifications } from '@/lib/data/dashboard';
-import { NAVIGATION_ITEMS } from '@/lib/constants';
+import { NAVIGATION_ITEMS, COMPANY_NAME } from '@/lib/constants';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -55,7 +55,7 @@ export function Header() {
                 </div>
                 <div>
                   <p className="text-sm font-bold text-gray-900 dark:text-white">HR Pro</p>
-                  <p className="text-[10px] text-gray-500">PT. Nusantara Digital</p>
+                  <p className="text-[10px] text-gray-500">{COMPANY_NAME}</p>
                 </div>
               </div>
             </div>

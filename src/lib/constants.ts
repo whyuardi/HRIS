@@ -3,7 +3,7 @@
 // =============================================
 
 export const APP_NAME = 'HR Pro';
-export const COMPANY_NAME = 'PT. Nusantara Digital Teknologi';
+export const COMPANY_NAME = 'PT. Benua Green Energy';
 
 export const NAVIGATION_ITEMS = [
   { label: 'Dashboard', href: '/', icon: 'LayoutDashboard' },
