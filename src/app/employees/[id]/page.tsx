@@ -3,7 +3,7 @@
 import { use } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { employees } from '@/lib/data/employees';
+import { dbGetEmployees } from '@/lib/db';
 import { jobHistories, salaryHistories } from '@/lib/data/dashboard';
 import { getDocumentsByEmployee } from '@/lib/data/documents';
 import { StatusBadge } from '@/components/shared/status-badge';
@@ -23,7 +23,8 @@ import {
 
 export default function EmployeeDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
-  const employee = employees.find(e => e.id === id);
+  const employeeList = dbGetEmployees();
+  const employee = employeeList.find(e => e.id === id);
 
   if (!employee) {
     return (
@@ -61,7 +62,7 @@ export default function EmployeeDetailPage({ params }: { params: Promise<{ id: s
               <Avatar className="w-24 h-24 border-4 border-white dark:border-gray-950 shadow-lg">
                 <AvatarImage src={employee.avatar} />
                 <AvatarFallback className="text-2xl bg-green-100 text-green-700">
-                  {employee.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                  {employee.name.split(' ').map((n: string) => n[0]).join('').slice(0, 2)}
                 </AvatarFallback>
               </Avatar>
               <div className="flex-1">

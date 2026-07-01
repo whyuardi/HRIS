@@ -2,7 +2,8 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { divisions } from '@/lib/data/divisions';
-import { employees } from '@/lib/data/employees';
+import { useState, useEffect } from 'react';
+import { dbGetEmployees } from '@/lib/db';
 import {
   PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend,
 } from 'recharts';
@@ -10,10 +11,16 @@ import {
 const COLORS = ['#3B82F6', '#8B5CF6', '#16A34A', '#F59E0B', '#EF4444'];
 
 export function DivisionChart() {
+  const [employeeList, setEmployeeList] = useState<any[]>([]);
+
+  useEffect(() => {
+    setEmployeeList(dbGetEmployees());
+  }, []);
+
   const data = divisions.map((div, idx) => ({
     name: div.name.split(' ')[0],
     fullName: div.name,
-    value: employees.filter(e => e.divisionId === div.id && (e.status === 'active' || e.status === 'probation')).length,
+    value: employeeList.filter(e => e.divisionId === div.id && (e.status === 'active' || e.status === 'probation')).length,
     color: COLORS[idx % COLORS.length],
   }));
 

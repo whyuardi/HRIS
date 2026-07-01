@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { employeeDocuments, getDocumentStats, getDocumentCompleteness } from '@/lib/data/documents';
+import { dbGetDocuments, dbSaveDocument, dbGetEmployees } from '@/lib/db';
 import { PageHeader } from '@/components/shared/page-header';
 import { StatusBadge } from '@/components/shared/status-badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -32,8 +32,52 @@ export default function DocumentsPage() {
   const [search, setSearch] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
-  const stats = getDocumentStats();
-  const completeness = getDocumentCompleteness();
+  const [docList, setDocList] = useState<any[]>([]);
+
+  useEffect(() => {
+    setDocList(dbGetDocuments());
+  }, []);
+
+  const stats = useMemo(() => {
+    return {
+      total: docList.length,
+      verified: docList.filter(d => d.status === 'verified').length,
+      uploaded: docList.filter(d => d.status === 'uploaded').length,
+      pendingReview: docList.filter(d => d.status === 'pending_review').length,
+      notUploaded: docList.filter(d => d.status === 'not_uploaded').length,
+    };
+  }, [docList]);
+
+  const completeness = useMemo(() => {
+    const activeEmployees = dbGetEmployees().filter(e => e.status === 'active' || e.status === 'probation');
+    return activeEmployees.map(emp => {
+      const docs = docList.filter(d => d.employeeId === emp.id);
+      const complete = docs.filter(d => d.status === 'verified' || d.status === 'uploaded').length;
+      return {
+        employeeId: emp.id,
+        employeeName: emp.name,
+        division: emp.division,
+        total: categories.length,
+        complete,
+        percentage: Math.round((complete / categories.length) * 100),
+      };
+    });
+  }, [docList]);
+
+  const handleUploadDoc = (id: string) => {
+    const list = dbGetDocuments();
+    const doc = list.find(r => r.id === id);
+    if (!doc) return;
+
+    doc.status = 'uploaded';
+    doc.fileName = `${doc.employeeName.split(' ')[0]}_${doc.category.replace(/\s/g, '_')}.pdf`;
+    doc.fileSize = '250KB';
+    doc.uploadDate = new Date().toISOString().split('T')[0];
+
+    dbSaveDocument(doc);
+    setDocList(dbGetDocuments());
+    alert(`Dokumen ${doc.category} untuk ${doc.employeeName} berhasil diunggah!`);
+  };
 
   const statCards = [
     { label: 'Total Dokumen', value: stats.total, icon: FolderOpen, color: 'bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400' },
@@ -44,14 +88,14 @@ export default function DocumentsPage() {
   ];
 
   const filteredDocs = useMemo(() => {
-    return employeeDocuments.filter(doc => {
+    return docList.filter(doc => {
       const matchSearch = search === '' ||
         doc.employeeName.toLowerCase().includes(search.toLowerCase());
       const matchCategory = categoryFilter === 'all' || doc.category === categoryFilter;
       const matchStatus = statusFilter === 'all' || doc.status === statusFilter;
       return matchSearch && matchCategory && matchStatus;
     });
-  }, [search, categoryFilter, statusFilter]);
+  }, [search, categoryFilter, statusFilter, docList]);
 
   // Group by employee for display
   const displayDocs = filteredDocs.slice(0, 50);
@@ -205,7 +249,7 @@ export default function DocumentsPage() {
                           </Button>
                         </>
                       ) : (
-                        <Button variant="ghost" size="sm" className="h-7 px-2 text-xs text-amber-600 hover:text-amber-700 hover:bg-amber-50">
+                        <Button variant="ghost" size="sm" className="h-7 px-2 text-xs text-amber-600 hover:text-amber-700 hover:bg-amber-50 cursor-pointer" onClick={() => handleUploadDoc(doc.id)}>
                           <Upload className="w-3.5 h-3.5 mr-1" /> Upload
                         </Button>
                       )}

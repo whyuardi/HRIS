@@ -1,19 +1,25 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { employees } from '@/lib/data/employees';
+import { dbGetEmployees } from '@/lib/db';
 import {
   PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend,
 } from 'recharts';
 
-const statusData = [
-  { name: 'Aktif', value: employees.filter(e => e.status === 'active').length, color: '#16A34A' },
-  { name: 'Probation', value: employees.filter(e => e.status === 'probation').length, color: '#F59E0B' },
-  { name: 'Tidak Aktif', value: employees.filter(e => e.status === 'inactive').length, color: '#6B7280' },
-  { name: 'Keluar', value: employees.filter(e => e.status === 'terminated').length, color: '#EF4444' },
-].filter(d => d.value > 0);
-
 export function EmployeeStatusChart() {
+  const [employeeList, setEmployeeList] = useState<any[]>([]);
+
+  useEffect(() => {
+    setEmployeeList(dbGetEmployees());
+  }, []);
+
+  const statusData = [
+    { name: 'Aktif', value: employeeList.filter(e => e.status === 'active').length, color: '#16A34A' },
+    { name: 'Probation', value: employeeList.filter(e => e.status === 'probation').length, color: '#F59E0B' },
+    { name: 'Tidak Aktif', value: employeeList.filter(e => e.status === 'inactive').length, color: '#6B7280' },
+    { name: 'Keluar', value: employeeList.filter(e => e.status === 'terminated').length, color: '#EF4444' },
+  ].filter(d => d.value > 0);
   return (
     <Card className="border-gray-200 dark:border-gray-800">
       <CardHeader className="pb-2">

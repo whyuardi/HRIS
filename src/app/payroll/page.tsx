@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { payrollData, getPayrollSummary } from '@/lib/data/payroll';
+import { dbGetPayroll, dbSavePayroll, dbGeneratePayroll } from '@/lib/db';
 import { divisions } from '@/lib/data/divisions';
 import { PageHeader } from '@/components/shared/page-header';
 import { StatusBadge } from '@/components/shared/status-badge';
@@ -32,24 +32,58 @@ export default function PayrollPage() {
   const [divisionFilter, setDivisionFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
   const [page, setPage] = useState(1);
-  const summary = getPayrollSummary();
+  const [payrollList, setPayrollList] = useState<any[]>([]);
+
+  useEffect(() => {
+    setPayrollList(dbGetPayroll());
+  }, []);
+
+  const summary = useMemo(() => {
+    return {
+      totalGross: payrollList.reduce((sum, p) => sum + p.basicSalary + p.allowance + p.bonus + p.overtime, 0),
+      totalNet: payrollList.reduce((sum, p) => sum + p.netSalary, 0),
+      totalDeduction: payrollList.reduce((sum, p) => sum + p.deduction + p.attendanceDeduction + p.bpjs + p.pph, 0),
+      totalAllowance: payrollList.reduce((sum, p) => sum + p.allowance, 0),
+      paid: payrollList.filter(p => p.status === 'paid').length,
+      pending: payrollList.filter(p => p.status === 'pending').length,
+      draft: payrollList.filter(p => p.status === 'draft').length,
+    };
+  }, [payrollList]);
 
   const stats = [
     { label: 'Total Gaji Bersih', value: formatCurrency(summary.totalNet), icon: Wallet, color: 'from-green-500 to-emerald-600', bg: 'bg-green-50 dark:bg-green-950/30', text: 'text-green-600 dark:text-green-400' },
     { label: 'Total Tunjangan', value: formatCurrency(summary.totalAllowance), icon: CreditCard, color: 'from-blue-500 to-blue-600', bg: 'bg-blue-50 dark:bg-blue-950/30', text: 'text-blue-600 dark:text-blue-400' },
     { label: 'Total Potongan', value: formatCurrency(summary.totalDeduction), icon: TrendingDown, color: 'from-red-500 to-red-600', bg: 'bg-red-50 dark:bg-red-950/30', text: 'text-red-600 dark:text-red-400' },
-    { label: 'Sudah Dibayar', value: `${summary.paid} / ${summary.paid + summary.pending + summary.draft}`, icon: DollarSign, color: 'from-emerald-500 to-green-600', bg: 'bg-emerald-50 dark:bg-emerald-950/30', text: 'text-emerald-600 dark:text-emerald-400' },
+    { label: 'Sudah Dibayar', value: `${summary.paid} / ${payrollList.length}`, icon: DollarSign, color: 'from-emerald-500 to-green-600', bg: 'bg-emerald-50 dark:bg-emerald-950/30', text: 'text-emerald-600 dark:text-emerald-400' },
   ];
 
+  const handleGeneratePayroll = () => {
+    dbGeneratePayroll('Juni 2026');
+    setPayrollList(dbGetPayroll());
+    alert('Payroll untuk periode Juni 2026 berhasil digenerate untuk seluruh karyawan!');
+  };
+
+  const handlePayPayroll = (id: string) => {
+    const list = dbGetPayroll();
+    const item = list.find(r => r.id === id);
+    if (!item) return;
+
+    item.status = 'paid';
+    item.transferDate = new Date().toISOString().split('T')[0];
+
+    dbSavePayroll(item);
+    setPayrollList(dbGetPayroll());
+  };
+
   const filteredData = useMemo(() => {
-    return payrollData.filter(item => {
+    return payrollList.filter(item => {
       const matchSearch = search === '' ||
         item.employeeName.toLowerCase().includes(search.toLowerCase());
       const matchDivision = divisionFilter === 'all' || item.division === divisions.find(d => d.id === divisionFilter)?.name;
       const matchStatus = statusFilter === 'all' || item.status === statusFilter;
       return matchSearch && matchDivision && matchStatus;
     });
-  }, [search, divisionFilter, statusFilter]);
+  }, [search, divisionFilter, statusFilter, payrollList]);
 
   const totalPages = Math.ceil(filteredData.length / ITEMS_PER_PAGE);
   const paginatedData = filteredData.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
@@ -66,7 +100,7 @@ export default function PayrollPage() {
         <Button variant="outline" size="sm" className="gap-2 text-xs">
           <Download className="w-4 h-4" /> Export Excel
         </Button>
-        <Button size="sm" className="gap-2 text-xs bg-green-600 hover:bg-green-700 text-white">
+        <Button size="sm" className="gap-2 text-xs bg-green-600 hover:bg-green-700 text-white cursor-pointer" onClick={handleGeneratePayroll}>
           <Wallet className="w-4 h-4" /> Generate Payroll
         </Button>
       </PageHeader>
@@ -157,6 +191,7 @@ export default function PayrollPage() {
                 <TableHead className="text-[11px] font-semibold uppercase tracking-wider text-gray-500 text-right">Gaji Bersih</TableHead>
                 <TableHead className="text-[11px] font-semibold uppercase tracking-wider text-gray-500">Status</TableHead>
                 <TableHead className="text-[11px] font-semibold uppercase tracking-wider text-gray-500 text-right hidden lg:table-cell">Transfer</TableHead>
+                <TableHead className="text-[11px] font-semibold uppercase tracking-wider text-gray-500 text-right">Aksi</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -179,6 +214,17 @@ export default function PayrollPage() {
                   <TableCell><StatusBadge status={item.status} /></TableCell>
                   <TableCell className="text-xs text-right text-gray-500 hidden lg:table-cell">
                     {item.transferDate ? new Date(item.transferDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' }) : '—'}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    {item.status !== 'paid' ? (
+                      <Button size="sm" variant="outline" className="h-7 text-[10px] text-green-600 border-green-200 hover:bg-green-50 cursor-pointer" onClick={() => handlePayPayroll(item.id)}>
+                        Bayar
+                      </Button>
+                    ) : (
+                      <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-gray-400 hover:text-gray-600 cursor-pointer">
+                        <Printer className="w-3.5 h-3.5" />
+                      </Button>
+                    )}
                   </TableCell>
                 </TableRow>
               ))}

@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { leaveRequests, getLeaveSummary } from '@/lib/data/leave';
+import { dbGetLeaveRequests, dbSaveLeaveRequest } from '@/lib/db';
 import { PageHeader } from '@/components/shared/page-header';
 import { StatusBadge } from '@/components/shared/status-badge';
 import { Card, CardContent } from '@/components/ui/card';
@@ -27,8 +27,43 @@ export default function LeavePage() {
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [leaveList, setLeaveList] = useState<LeaveRequest[]>([]);
   const [selectedLeave, setSelectedLeave] = useState<LeaveRequest | null>(null);
-  const summary = getLeaveSummary();
+
+  useEffect(() => {
+    setLeaveList(dbGetLeaveRequests());
+  }, []);
+
+  const summary = useMemo(() => {
+    return {
+      total: leaveList.length,
+      pending: leaveList.filter(l => l.status === 'pending').length,
+      approved: leaveList.filter(l => l.status === 'approved').length,
+      rejected: leaveList.filter(l => l.status === 'rejected').length,
+      cuti: leaveList.filter(l => l.type === 'cuti').length,
+      izin: leaveList.filter(l => l.type === 'izin').length,
+      sakit: leaveList.filter(l => l.type === 'sakit').length,
+      dinas: leaveList.filter(l => l.type === 'dinas').length,
+    };
+  }, [leaveList]);
+
+  const handleApproveReject = (id: string, newStatus: 'approved' | 'rejected') => {
+    const list = dbGetLeaveRequests();
+    const request = list.find(r => r.id === id);
+    if (!request) return;
+
+    request.status = newStatus;
+    request.approvedBy = 'Admin HRD';
+    request.approvedDate = new Date().toISOString();
+
+    dbSaveLeaveRequest(request);
+    
+    // Refresh states
+    setLeaveList(dbGetLeaveRequests());
+    if (selectedLeave && selectedLeave.id === id) {
+      setSelectedLeave(null); // Close or update dialog
+    }
+  };
 
   const stats = [
     { label: 'Total Pengajuan', value: summary.total, icon: CalendarDays, color: 'bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400' },
@@ -42,14 +77,14 @@ export default function LeavePage() {
   ];
 
   const filteredData = useMemo(() => {
-    return leaveRequests.filter(item => {
+    return leaveList.filter(item => {
       const matchSearch = search === '' ||
         item.employeeName.toLowerCase().includes(search.toLowerCase());
       const matchType = typeFilter === 'all' || item.type === typeFilter;
       const matchStatus = statusFilter === 'all' || item.status === statusFilter;
       return matchSearch && matchType && matchStatus;
     });
-  }, [search, typeFilter, statusFilter]);
+  }, [search, typeFilter, statusFilter, leaveList]);
 
   return (
     <div className="space-y-6">
@@ -169,10 +204,10 @@ export default function LeavePage() {
                       </Button>
                       {item.status === 'pending' && (
                         <>
-                          <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-green-600 hover:text-green-700 hover:bg-green-50">
+                          <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-green-600 hover:text-green-700 hover:bg-green-50" onClick={() => handleApproveReject(item.id, 'approved')}>
                             <CheckCircle2 className="w-3.5 h-3.5" />
                           </Button>
-                          <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-red-500 hover:text-red-600 hover:bg-red-50">
+                          <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-red-500 hover:text-red-600 hover:bg-red-50" onClick={() => handleApproveReject(item.id, 'rejected')}>
                             <XCircle className="w-3.5 h-3.5" />
                           </Button>
                         </>
@@ -239,10 +274,10 @@ export default function LeavePage() {
           <DialogFooter>
             {selectedLeave?.status === 'pending' && (
               <div className="flex gap-2 w-full">
-                <Button variant="outline" className="flex-1 gap-2 text-red-600 border-red-200 hover:bg-red-50">
+                <Button variant="outline" className="flex-1 gap-2 text-red-600 border-red-200 hover:bg-red-50" onClick={() => handleApproveReject(selectedLeave.id, 'rejected')}>
                   <XCircle className="w-4 h-4" /> Tolak
                 </Button>
-                <Button className="flex-1 gap-2 bg-green-600 hover:bg-green-700 text-white">
+                <Button className="flex-1 gap-2 bg-green-600 hover:bg-green-700 text-white" onClick={() => handleApproveReject(selectedLeave.id, 'approved')}>
                   <CheckCircle2 className="w-4 h-4" /> Setujui
                 </Button>
               </div>

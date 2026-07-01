@@ -69,7 +69,7 @@ export function RecentActivity() {
               {/* Avatar */}
               <Avatar className="w-6 h-6">
                 <AvatarImage src={activity.avatar} />
-                <AvatarFallback className="text-[8px] bg-gray-100 dark:bg-gray-800">{activity.user.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                <AvatarFallback className="text-[8px] bg-gray-100 dark:bg-gray-800">{activity.user.split(' ').map((n: string) => n[0]).join('')}</AvatarFallback>
               </Avatar>
             </div>
           );

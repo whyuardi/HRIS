@@ -30,14 +30,51 @@ function formatValue(value: number, format: string): string {
   return value.toString();
 }
 
+import { useState, useEffect } from 'react';
+import { dbGetEmployees, dbGetAttendance, dbGetPayroll } from '@/lib/db';
+
 export function SummaryCards() {
-  const summary = getDashboardSummary();
+  const [summary, setSummary] = useState<any>({
+    totalEmployees: 0,
+    presentToday: 0,
+    onLeave: 0,
+    onPermission: 0,
+    wfh: 0,
+    late: 0,
+    monthlyPayroll: 0,
+    contractExpiring: 0,
+  });
+
+  useEffect(() => {
+    const emps = dbGetEmployees();
+    const att = dbGetAttendance();
+    const pay = dbGetPayroll();
+
+    const activeEmployees = emps.filter(e => e.status === 'active' || e.status === 'probation');
+    const contractExpiring = emps.filter(e => {
+      const end = new Date(e.contractEnd);
+      const now = new Date();
+      const diff = (end.getTime() - now.getTime()) / (1000 * 60 * 60 * 24);
+      return diff > 0 && diff <= 90 && (e.status === 'active' || e.status === 'probation');
+    });
+
+    setSummary({
+      totalEmployees: activeEmployees.length,
+      presentToday: att.filter(a => a.status === 'hadir' || a.status === 'terlambat').length,
+      onLeave: att.filter(a => a.status === 'cuti').length,
+      onPermission: att.filter(a => a.status === 'izin').length,
+      wfh: att.filter(a => a.status === 'wfh').length,
+      late: att.filter(a => a.status === 'terlambat').length,
+      monthlyPayroll: pay.reduce((sum, p) => sum + p.netSalary, 0),
+      contractExpiring: contractExpiring.length,
+    });
+  }, []);
 
   return (
     <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       {cardConfig.map((config, index) => {
         const Icon = iconMap[config.icon];
-        const value = summary[config.key as keyof typeof summary];
+        const value = summary[config.key] || 0;
 
         return (
           <motion.div

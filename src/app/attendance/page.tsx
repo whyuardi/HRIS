@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { todayAttendance, monthlyAttendanceStats } from '@/lib/data/attendance';
+import { monthlyAttendanceStats } from '@/lib/data/attendance';
 import { divisions } from '@/lib/data/divisions';
-import { employees } from '@/lib/data/employees';
+import { dbGetAttendance, dbSaveAttendance, dbGetEmployees } from '@/lib/db';
 import { PageHeader } from '@/components/shared/page-header';
 import { StatusBadge } from '@/components/shared/status-badge';
 import { Card, CardContent } from '@/components/ui/card';
@@ -34,7 +34,11 @@ export default function AttendancePage() {
   const [statusFilter, setStatusFilter] = useState('all');
 
   // Interactive local state for attendance list
-  const [attendanceList, setAttendanceList] = useState(todayAttendance);
+  const [attendanceList, setAttendanceList] = useState<any[]>([]);
+
+  useEffect(() => {
+    setAttendanceList(dbGetAttendance());
+  }, []);
 
   // Dialog input states
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -46,8 +50,8 @@ export default function AttendancePage() {
 
   // Only allow check-in for active/probation employees
   const activeEmployees = useMemo(() => {
-    return employees.filter(e => e.status === 'active' || e.status === 'probation');
-  }, []);
+    return dbGetEmployees().filter(e => e.status === 'active' || e.status === 'probation');
+  }, [attendanceList]);
 
   // Compute live statistics based on state
   const summary = useMemo(() => {
@@ -86,7 +90,8 @@ export default function AttendancePage() {
   const handleSaveAttendance = () => {
     if (!selectedEmpId) return;
 
-    const emp = employees.find(e => e.id === selectedEmpId);
+    const activeEmps = dbGetEmployees();
+    const emp = activeEmps.find(e => e.id === selectedEmpId);
     if (!emp) return;
 
     const existingIdx = attendanceList.findIndex(a => a.employeeId === selectedEmpId);
@@ -114,6 +119,8 @@ export default function AttendancePage() {
       status: attStatus,
       note: attNote || (attStatus === 'wfh' ? 'Work from home' : ''),
     };
+
+    dbSaveAttendance(newRecord);
 
     if (existingIdx >= 0) {
       const updated = [...attendanceList];
@@ -310,7 +317,7 @@ export default function AttendancePage() {
                     <div className="flex items-center gap-3">
                       <Avatar className="w-7 h-7">
                         <AvatarImage src={`https://api.dicebear.com/9.x/notionists/svg?seed=${att.employeeName.split(' ')[0]}`} />
-                        <AvatarFallback className="text-[9px]">{att.employeeName.split(' ').map(n => n[0]).join('').slice(0, 2)}</AvatarFallback>
+                        <AvatarFallback className="text-[9px]">{att.employeeName.split(' ').map((n: string) => n[0]).join('').slice(0, 2)}</AvatarFallback>
                       </Avatar>
                       <span className="text-sm font-medium text-gray-900 dark:text-white">{att.employeeName}</span>
                     </div>

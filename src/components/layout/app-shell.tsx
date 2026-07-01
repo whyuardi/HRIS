@@ -38,7 +38,13 @@ function MainContent({ children }: { children: ReactNode }) {
   );
 }
 
+import { initDb } from '@/lib/db';
+
 export function AppShell({ children }: { children: ReactNode }) {
+  useEffect(() => {
+    initDb();
+  }, []);
+
   return (
     <TooltipProvider>
       <SidebarProvider>
