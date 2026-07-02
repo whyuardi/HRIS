@@ -100,17 +100,20 @@ export function Header() {
     const query = searchQuery.toLowerCase();
 
     // Match employees
-    const matchedEmps = employees.filter(emp => 
-      emp.name.toLowerCase().includes(query) ||
-      emp.nik.toLowerCase().includes(query) ||
-      emp.position.toLowerCase().includes(query) ||
-      emp.division.toLowerCase().includes(query)
-    ).slice(0, 5);
+    const matchedEmps = (employees || []).filter(emp => {
+      if (!emp) return false;
+      const name = emp.name?.toLowerCase() || '';
+      const nik = emp.nik?.toLowerCase() || '';
+      const position = emp.position?.toLowerCase() || '';
+      const division = emp.division?.toLowerCase() || '';
+      return name.includes(query) || nik.includes(query) || position.includes(query) || division.includes(query);
+    }).slice(0, 5);
 
     // Match menus
-    const matchedMenus = NAVIGATION_ITEMS.filter(item => 
-      item.label.toLowerCase().includes(query)
-    );
+    const matchedMenus = (NAVIGATION_ITEMS || []).filter(item => {
+      if (!item || !item.label) return false;
+      return item.label.toLowerCase().includes(query);
+    });
 
     return { employees: matchedEmps, menus: matchedMenus };
   }, [searchQuery, employees]);
@@ -278,6 +281,10 @@ export function Header() {
       {/* Global Search Dialog (Command Palette) */}
       <Dialog open={isSearchOpen} onOpenChange={setIsSearchOpen}>
         <DialogContent className="sm:max-w-xl p-0 overflow-hidden border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl">
+          <DialogHeader className="sr-only">
+            <DialogTitle>Pencarian Global</DialogTitle>
+            <DialogDescription>Cari nama karyawan, jabatan, atau halaman menu.</DialogDescription>
+          </DialogHeader>
           <div className="flex items-center border-b border-slate-150 dark:border-slate-850 px-3 h-12 bg-slate-50 dark:bg-slate-900">
             <Search className="w-4 h-4 text-slate-400 mr-3 flex-shrink-0" />
             <input 
