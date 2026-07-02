@@ -17,9 +17,10 @@ import {
 } from '@/components/ui/select';
 import {
   Search, Upload, Eye, Download, FileText, CheckCircle2,
-  AlertCircle, Clock, XCircle, Filter, FolderOpen,
+  AlertCircle, Clock, XCircle, Filter, FolderOpen, AlertTriangle, Bell,
 } from 'lucide-react';
 import { DocumentCategory } from '@/types';
+import { toast } from 'sonner';
 
 const categories: DocumentCategory[] = ['KTP', 'KK', 'NPWP', 'Ijazah', 'Sertifikat', 'BPJS', 'Jamsostek', 'Kontrak Kerja'];
 
@@ -139,6 +140,73 @@ export default function DocumentsPage() {
           );
         })}
       </div>
+
+      {/* Document Expiry Alert */}
+      <Card className="border-amber-200/60 dark:border-amber-800/30 overflow-hidden">
+        <div className="h-1 bg-gradient-to-r from-amber-500 to-orange-600" />
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base font-semibold text-slate-900 dark:text-white flex items-center gap-2">
+            <Bell className="w-4 h-4 text-amber-600" />
+            Peringatan Dokumen Kedaluwarsa
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-2">
+            {(() => {
+              // Simulate document expiry alerts
+              const now = new Date();
+              const expiryAlerts = [
+                { employee: 'Ahmad Fadli', doc: 'Kontrak Kerja', expiryDate: new Date(now.getTime() + 7 * 86400000), urgency: 'critical' },
+                { employee: 'Sari Dewi', doc: 'KTP', expiryDate: new Date(now.getTime() + 15 * 86400000), urgency: 'warning' },
+                { employee: 'Budi Santoso', doc: 'BPJS', expiryDate: new Date(now.getTime() + 30 * 86400000), urgency: 'info' },
+                { employee: 'Rina Maharani', doc: 'Kontrak Kerja', expiryDate: new Date(now.getTime() + 45 * 86400000), urgency: 'info' },
+                { employee: 'Dian Purnama', doc: 'KTP', expiryDate: new Date(now.getTime() + 60 * 86400000), urgency: 'info' },
+              ];
+
+              const urgencyStyles = {
+                critical: 'bg-red-50 dark:bg-red-950/20 border-red-200 dark:border-red-800/30',
+                warning: 'bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-800/30',
+                info: 'bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-800/30',
+              };
+              const urgencyIcons = {
+                critical: 'text-red-600 dark:text-red-400',
+                warning: 'text-amber-600 dark:text-amber-400',
+                info: 'text-blue-600 dark:text-blue-400',
+              };
+
+              return expiryAlerts.map((alert, i) => {
+                const daysLeft = Math.ceil((alert.expiryDate.getTime() - now.getTime()) / 86400000);
+                return (
+                  <motion.div
+                    key={`${alert.employee}-${alert.doc}`}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: i * 0.05 }}
+                    className={`flex items-center gap-3 p-3 rounded-xl border ${urgencyStyles[alert.urgency as keyof typeof urgencyStyles]}`}
+                  >
+                    <AlertTriangle className={`w-4 h-4 flex-shrink-0 ${urgencyIcons[alert.urgency as keyof typeof urgencyIcons]}`} />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-slate-900 dark:text-white">
+                        {alert.employee} — <span className="text-slate-600 dark:text-slate-400">{alert.doc}</span>
+                      </p>
+                      <p className="text-[10px] text-slate-500">
+                        Kedaluwarsa: {alert.expiryDate.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
+                      </p>
+                    </div>
+                    <span className={`text-xs font-bold px-2 py-1 rounded-full ${
+                      daysLeft <= 7 ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' :
+                      daysLeft <= 30 ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' :
+                      'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
+                    }`}>
+                      {daysLeft} hari lagi
+                    </span>
+                  </motion.div>
+                );
+              });
+            })()}
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Document Completeness */}
       <Card className="border-gray-200 dark:border-gray-800">

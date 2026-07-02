@@ -8,11 +8,11 @@ import { NAVIGATION_ITEMS, APP_NAME, COMPANY_NAME } from '@/lib/constants';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import {
   LayoutDashboard, Users, Clock, Wallet, CalendarDays, BarChart3,
-  FileText, Settings, ChevronLeft, ChevronRight, Hexagon,
+  FileText, Settings, ChevronLeft, ChevronRight, Hexagon, Network, History,
 } from 'lucide-react';
 
 const iconMap: Record<string, React.ElementType> = {
-  LayoutDashboard, Users, Clock, Wallet, CalendarDays, BarChart3, FileText, Settings,
+  LayoutDashboard, Users, Network, Clock, Wallet, CalendarDays, BarChart3, FileText, Settings, History,
 };
 
 export function Sidebar() {

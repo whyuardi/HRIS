@@ -50,71 +50,71 @@
 
 :root {
   --background: #F8FAFC;
-  --foreground: #111827;
+  --foreground: #0F172A;
   --card: #FFFFFF;
-  --card-foreground: #111827;
+  --card-foreground: #0F172A;
   --popover: #FFFFFF;
-  --popover-foreground: #111827;
-  --primary: #16A34A;
+  --popover-foreground: #0F172A;
+  --primary: #059669;
   --primary-foreground: #FFFFFF;
   --secondary: #F1F5F9;
-  --secondary-foreground: #111827;
+  --secondary-foreground: #0F172A;
   --muted: #F1F5F9;
-  --muted-foreground: #6B7280;
-  --accent: #F0FDF4;
-  --accent-foreground: #16A34A;
-  --destructive: #EF4444;
-  --border: #E5E7EB;
-  --input: #E5E7EB;
-  --ring: #16A34A;
-  --chart-1: #16A34A;
+  --muted-foreground: #64748B;
+  --accent: #ECFDF5;
+  --accent-foreground: #059669;
+  --destructive: #DC2626;
+  --border: #E2E8F0;
+  --input: #E2E8F0;
+  --ring: #059669;
+  --chart-1: #059669;
   --chart-2: #3B82F6;
   --chart-3: #8B5CF6;
   --chart-4: #F59E0B;
   --chart-5: #EF4444;
-  --radius: 0.625rem;
+  --radius: 0.75rem;
   --sidebar: #FFFFFF;
-  --sidebar-foreground: #111827;
-  --sidebar-primary: #16A34A;
+  --sidebar-foreground: #0F172A;
+  --sidebar-primary: #059669;
   --sidebar-primary-foreground: #FFFFFF;
-  --sidebar-accent: #F0FDF4;
-  --sidebar-accent-foreground: #16A34A;
-  --sidebar-border: #E5E7EB;
-  --sidebar-ring: #16A34A;
+  --sidebar-accent: #ECFDF5;
+  --sidebar-accent-foreground: #059669;
+  --sidebar-border: #E2E8F0;
+  --sidebar-ring: #059669;
 }
 
 .dark {
-  --background: #0F172A;
-  --foreground: #F8FAFC;
-  --card: #1E293B;
-  --card-foreground: #F8FAFC;
-  --popover: #1E293B;
-  --popover-foreground: #F8FAFC;
-  --primary: #22C55E;
+  --background: #0C1222;
+  --foreground: #F1F5F9;
+  --card: #151D2E;
+  --card-foreground: #F1F5F9;
+  --popover: #151D2E;
+  --popover-foreground: #F1F5F9;
+  --primary: #10B981;
   --primary-foreground: #FFFFFF;
-  --secondary: #334155;
-  --secondary-foreground: #F8FAFC;
-  --muted: #334155;
+  --secondary: #1E293B;
+  --secondary-foreground: #F1F5F9;
+  --muted: #1E293B;
   --muted-foreground: #94A3B8;
-  --accent: #14532D;
-  --accent-foreground: #22C55E;
+  --accent: #064E3B;
+  --accent-foreground: #10B981;
   --destructive: #F87171;
-  --border: #334155;
-  --input: #334155;
-  --ring: #22C55E;
-  --chart-1: #22C55E;
+  --border: #1E293B;
+  --input: #1E293B;
+  --ring: #10B981;
+  --chart-1: #10B981;
   --chart-2: #60A5FA;
   --chart-3: #A78BFA;
   --chart-4: #FBBF24;
   --chart-5: #F87171;
-  --sidebar: #1E293B;
-  --sidebar-foreground: #F8FAFC;
-  --sidebar-primary: #22C55E;
+  --sidebar: #151D2E;
+  --sidebar-foreground: #F1F5F9;
+  --sidebar-primary: #10B981;
   --sidebar-primary-foreground: #FFFFFF;
-  --sidebar-accent: #14532D;
-  --sidebar-accent-foreground: #22C55E;
-  --sidebar-border: #334155;
-  --sidebar-ring: #22C55E;
+  --sidebar-accent: #064E3B;
+  --sidebar-accent-foreground: #10B981;
+  --sidebar-border: #1E293B;
+  --sidebar-ring: #10B981;
 }
 
 @layer base {
@@ -131,8 +131,8 @@
 
 /* Custom scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 
 ::-webkit-scrollbar-track {
@@ -141,7 +141,7 @@
 
 ::-webkit-scrollbar-thumb {
   background: #CBD5E1;
-  border-radius: 3px;
+  border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
@@ -149,22 +149,238 @@
 }
 
 .dark ::-webkit-scrollbar-thumb {
-  background: #475569;
+  background: #334155;
 }
 
 .dark ::-webkit-scrollbar-thumb:hover {
-  background: #64748B;
+  background: #475569;
 }
 
-/* Table hover animation */
+/* Premium table row hover */
+.table-row-hover {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.table-row-hover:hover {
+  background-color: #F0FDF4;
+}
+
+.dark .table-row-hover:hover {
+  background-color: rgba(16, 185, 129, 0.05);
+}
+
+/* Glassmorphism card */
+.glass-card {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(226, 232, 240, 0.5);
+}
+
+.dark .glass-card {
+  background: rgba(21, 29, 46, 0.7);
+  border: 1px solid rgba(30, 41, 59, 0.5);
+}
+
+/* Premium gradient accent bar */
+.gradient-bar-emerald {
+  background: linear-gradient(135deg, #059669, #10B981, #34D399);
+}
+
+.gradient-bar-blue {
+  background: linear-gradient(135deg, #2563EB, #3B82F6, #60A5FA);
+}
+
+.gradient-bar-purple {
+  background: linear-gradient(135deg, #7C3AED, #8B5CF6, #A78BFA);
+}
+
+.gradient-bar-amber {
+  background: linear-gradient(135deg, #D97706, #F59E0B, #FBBF24);
+}
+
+.gradient-bar-red {
+  background: linear-gradient(135deg, #DC2626, #EF4444, #F87171);
+}
+
+.gradient-bar-cyan {
+  background: linear-gradient(135deg, #0891B2, #06B6D4, #22D3EE);
+}
+
+.gradient-bar-indigo {
+  background: linear-gradient(135deg, #4F46E5, #6366F1, #818CF8);
+}
+
+/* Premium focus ring animation */
+input:focus, select:focus, textarea:focus {
+  transition: box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Modal section divider */
+.modal-section-divider {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 4px 0;
+}
+
+.modal-section-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(to right, #E2E8F0, transparent);
+}
+
+.dark .modal-section-divider::after {
+  background: linear-gradient(to right, #334155, transparent);
+}
+
+/* Smooth card hover lift */
+.card-hover-lift {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px -5px rgba(5, 150, 105, 0.1), 0 4px 10px -3px rgba(0, 0, 0, 0.05);
+}
+
+/* KPI trend badge animation */
+@keyframes trendPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+.trend-pulse {
+  animation: trendPulse 2s ease-in-out infinite;
+}
+
+/* Skeleton loading animation */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.skeleton {
+  background: linear-gradient(90deg, #F1F5F9 25%, #E2E8F0 50%, #F1F5F9 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+  border-radius: 6px;
+}
+
+.dark .skeleton {
+  background: linear-gradient(90deg, #1E293B 25%, #334155 50%, #1E293B 75%);
+  background-size: 200% 100%;
+}
+
+/* Premium button hover scale */
+.btn-premium {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-premium:hover {
+  transform: scale(1.02);
+}
+
+.btn-premium:active {
+  transform: scale(0.98);
+}
+
+/* Sonner toast override for green theme */
+[data-sonner-toaster] [data-sonner-toast][data-type='success'] {
+  --toast-bg: #ECFDF5;
+  --toast-border: #A7F3D0;
+  --toast-text: #065F46;
+}
+
+/* ===================== */
+/* Print-Ready Reports   */
+/* ===================== */
+@media print {
+  /* Hide non-essential UI */
+  aside, header, nav, .print-hidden,
+  [data-sonner-toaster],
+  button:not(.print-visible) {
+    display: none !important;
+  }
+
+  /* Full-width content */
+  main {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  /* Clean card backgrounds */
+  .card, [class*="Card"] {
+    border: 1px solid #e2e8f0 !important;
+    box-shadow: none !important;
+    page-break-inside: avoid;
+  }
+
+  /* Tables for print */
+  table {
+    width: 100% !important;
+    font-size: 11px !important;
+  }
+
+  th, td {
+    padding: 6px 8px !important;
+    border: 1px solid #e2e8f0 !important;
+  }
+
+  /* Force white background */
+  body, html {
+    background: white !important;
+    color: black !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Page breaks */
+  h1, h2, h3 {
+    page-break-after: avoid;
+  }
+}
+
+/* ===================== */
+/* Skeleton Variants     */
+/* ===================== */
+.skeleton-text {
+  height: 12px;
+  border-radius: 4px;
+}
+
+.skeleton-avatar {
+  border-radius: 50%;
+}
+
+.skeleton-card {
+  border-radius: 16px;
+  min-height: 100px;
+}
+
+/* ===================== */
+/* Breadcrumb styling    */
+/* ===================== */
+.breadcrumb-separator {
+  color: #94a3b8;
+  margin: 0 4px;
+  font-size: 10px;
+}
+
+/* ===================== */
+/* Table row hover       */
+/* ===================== */
 .table-row-hover {
   transition: background-color 0.15s ease;
 }
 
 .table-row-hover:hover {
-  background-color: #F8FAFC;
+  background-color: rgba(5, 150, 105, 0.03);
 }
 
 .dark .table-row-hover:hover {
-  background-color: #1E293B;
+  background-color: rgba(5, 150, 105, 0.05);
 }

@@ -8,11 +8,13 @@ export const COMPANY_NAME = 'PT. Benua Green Energy';
 export const NAVIGATION_ITEMS = [
   { label: 'Dashboard', href: '/', icon: 'LayoutDashboard' },
   { label: 'Data Karyawan', href: '/employees', icon: 'Users' },
+  { label: 'Struktur Organisasi', href: '/org-chart', icon: 'Network' },
   { label: 'Absensi', href: '/attendance', icon: 'Clock' },
   { label: 'Payroll', href: '/payroll', icon: 'Wallet' },
   { label: 'Izin & Cuti', href: '/leave', icon: 'CalendarDays' },
   { label: 'HR Reporting', href: '/reports', icon: 'BarChart3' },
   { label: 'Dokumen', href: '/documents', icon: 'FileText' },
+  { label: 'Activity Log', href: '/activity-log', icon: 'History' },
   { label: 'Pengaturan', href: '/settings', icon: 'Settings' },
 ] as const;
 

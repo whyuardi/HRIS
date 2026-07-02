@@ -6,6 +6,7 @@ import { TooltipProvider } from '@/components/ui/tooltip';
 import { SidebarProvider, useSidebar } from '@/hooks/use-sidebar';
 import { Sidebar } from './sidebar';
 import { Header } from './header';
+import { Breadcrumbs } from '@/components/shared/breadcrumbs';
 
 import { useState, useEffect } from 'react';
 
@@ -32,6 +33,7 @@ function MainContent({ children }: { children: ReactNode }) {
     >
       <Header />
       <main className="flex-1 p-4 lg:p-6 overflow-x-hidden">
+        <Breadcrumbs />
         {children}
       </main>
     </motion.div>
