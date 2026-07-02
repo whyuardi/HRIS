@@ -207,7 +207,7 @@ export default function AttendancePage() {
               <div className="space-y-1.5">
                 <Label htmlFor="employee" className="text-xs font-medium">Pilih Karyawan <span className="text-rose-500">*</span></Label>
                 <Select value={selectedEmpId} onValueChange={(v) => v && setSelectedEmpId(v)}>
-                  <SelectTrigger className="h-9 text-sm">
+                  <SelectTrigger className="w-full h-9 text-sm">
                     <SelectValue placeholder="Pilih Karyawan..." />
                   </SelectTrigger>
                   <SelectContent>
@@ -222,7 +222,7 @@ export default function AttendancePage() {
                 <div className="space-y-1.5">
                   <Label htmlFor="status" className="text-xs font-medium">Status Kehadiran</Label>
                   <Select value={attStatus} onValueChange={(v) => v && setAttStatus(v as AttendanceStatus)}>
-                    <SelectTrigger className="h-9 text-sm">
+                    <SelectTrigger className="w-full h-9 text-sm">
                       <SelectValue placeholder="Pilih Status" />
                     </SelectTrigger>
                     <SelectContent>

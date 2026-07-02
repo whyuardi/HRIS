@@ -177,7 +177,7 @@ export default function LeavePage() {
             <div className="space-y-1.5">
               <Label className="text-xs font-medium">Karyawan <span className="text-rose-500">*</span></Label>
               <Select value={newLeave.employeeId} onValueChange={(v) => v && setNewLeave({ ...newLeave, employeeId: v })}>
-                <SelectTrigger className="h-9 text-sm">
+                <SelectTrigger className="w-full h-9 text-sm">
                   <SelectValue placeholder="Pilih Karyawan..." />
                 </SelectTrigger>
                 <SelectContent>
@@ -190,7 +190,7 @@ export default function LeavePage() {
             <div className="space-y-1.5">
               <Label className="text-xs font-medium">Jenis Pengajuan</Label>
               <Select value={newLeave.type} onValueChange={(v) => v && setNewLeave({ ...newLeave, type: v as LeaveType })}>
-                <SelectTrigger className="h-9 text-sm">
+                <SelectTrigger className="w-full h-9 text-sm">
                   <SelectValue placeholder="Pilih Jenis" />
                 </SelectTrigger>
                 <SelectContent>
