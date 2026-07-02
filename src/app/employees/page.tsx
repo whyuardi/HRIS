@@ -92,6 +92,19 @@ export default function EmployeesPage() {
     return () => clearTimeout(timer);
   }, []);
 
+  const [isPrinting, setIsPrinting] = useState(false);
+
+  useEffect(() => {
+    const handleBeforePrint = () => setIsPrinting(true);
+    const handleAfterPrint = () => setIsPrinting(false);
+    window.addEventListener('beforeprint', handleBeforePrint);
+    window.addEventListener('afterprint', handleAfterPrint);
+    return () => {
+      window.removeEventListener('beforeprint', handleBeforePrint);
+      window.removeEventListener('afterprint', handleAfterPrint);
+    };
+  }, []);
+
   const filteredEmployees = useMemo(() => {
     return employeeList.filter(emp => {
       const matchSearch = search === '' ||
@@ -106,7 +119,9 @@ export default function EmployeesPage() {
   }, [search, divisionFilter, statusFilter, contractFilter, employeeList]);
 
   const totalPages = Math.ceil(filteredEmployees.length / ITEMS_PER_PAGE);
-  const paginatedEmployees = filteredEmployees.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
+  const paginatedEmployees = isPrinting
+    ? filteredEmployees
+    : filteredEmployees.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
 
   // Selection handlers
   const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {

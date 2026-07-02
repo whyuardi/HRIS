@@ -297,45 +297,65 @@ input:focus, select:focus, textarea:focus {
 /* Print-Ready Reports   */
 /* ===================== */
 @media print {
-  /* Hide non-essential UI */
+  /* Hide non-essential UI, forms, buttons, filters, and paginators */
   aside, header, nav, .print-hidden,
   [data-sonner-toaster],
-  button:not(.print-visible) {
+  button,
+  input,
+  select,
+  [role="combobox"],
+  .border-t.border-slate-100,
+  .border-t.border-slate-800,
+  .flex.items-center.justify-between.px-4.py-3 {
     display: none !important;
   }
 
-  /* Full-width content */
-  main {
+  /* Reset layout constraints and force 100% width */
+  body, html, main, 
+  div[class*="min-h-screen"], 
+  div[class*="ml-"], 
+  div[style*="margin-left"] {
+    background: white !important;
+    color: black !important;
     margin: 0 !important;
+    margin-left: 0 !important;
     padding: 0 !important;
     width: 100% !important;
     max-width: 100% !important;
+    position: static !important;
+    transform: none !important;
   }
 
-  /* Clean card backgrounds */
+  /* Card styling for print */
   .card, [class*="Card"] {
-    border: 1px solid #e2e8f0 !important;
+    border: 1px solid #cbd5e1 !important;
     box-shadow: none !important;
     page-break-inside: avoid;
+    margin-bottom: 20px !important;
+    background: white !important;
   }
 
   /* Tables for print */
   table {
     width: 100% !important;
-    font-size: 11px !important;
+    font-size: 10px !important;
+    border-collapse: collapse !important;
   }
 
   th, td {
-    padding: 6px 8px !important;
-    border: 1px solid #e2e8f0 !important;
+    padding: 8px 10px !important;
+    border: 1px solid #cbd5e1 !important;
+    color: black !important;
   }
 
-  /* Force white background */
-  body, html {
-    background: white !important;
-    color: black !important;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
+  tr {
+    page-break-inside: avoid !important;
+  }
+
+  /* Force background colors to print */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
 
   /* Page breaks */

@@ -10,6 +10,7 @@ import { AttendanceChart } from '@/components/charts/attendance-chart';
 import { PayrollChart } from '@/components/charts/payroll-chart';
 import { DivisionChart } from '@/components/charts/division-chart';
 import { EmployeeStatusChart } from '@/components/charts/employee-chart';
+import { TurnoverChart } from '@/components/charts/turnover-chart';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { dbGetEmployees, dbGetAttendance } from '@/lib/db';
@@ -177,22 +178,15 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
 
-        {/* Short Summary chart wrapper */}
-        <Card className="border-slate-200/60 dark:border-slate-800/60 shadow-sm flex flex-col justify-center">
-          <CardContent className="p-4">
-            <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 text-center">Komposisi Divisi</h3>
-            <div className="h-32">
-              <DivisionChart />
-            </div>
-          </CardContent>
-        </Card>
+        {/* Division Chart directly */}
+        <DivisionChart />
 
       </div>
 
       {/* Charts Row 2 */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <DivisionChart />
         <EmployeeStatusChart />
+        <TurnoverChart />
       </div>
     </div>
   );

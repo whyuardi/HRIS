@@ -114,6 +114,19 @@ export default function PayrollPage() {
     window.print();
   };
 
+  const [isPrinting, setIsPrinting] = useState(false);
+
+  useEffect(() => {
+    const handleBeforePrint = () => setIsPrinting(true);
+    const handleAfterPrint = () => setIsPrinting(false);
+    window.addEventListener('beforeprint', handleBeforePrint);
+    window.addEventListener('afterprint', handleAfterPrint);
+    return () => {
+      window.removeEventListener('beforeprint', handleBeforePrint);
+      window.removeEventListener('afterprint', handleAfterPrint);
+    };
+  }, []);
+
   const filteredData = useMemo(() => {
     return payrollList.filter(item => {
       const matchSearch = search === '' ||
@@ -125,7 +138,7 @@ export default function PayrollPage() {
   }, [search, divisionFilter, statusFilter, payrollList]);
 
   const totalPages = Math.ceil(filteredData.length / ITEMS_PER_PAGE);
-  const paginatedData = filteredData.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
+  const paginatedData = isPrinting ? filteredData : filteredData.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
 
   return (
     <div className="space-y-6">
@@ -133,11 +146,15 @@ export default function PayrollPage() {
         title="Payroll"
         description="Pengelolaan gaji dan kompensasi karyawan — Periode Juni 2026"
       >
-        <Button variant="outline" size="sm" className="gap-2 text-xs rounded-xl">
-          <Printer className="w-4 h-4" /> Cetak Slip Gaji
-        </Button>
-        <Button variant="outline" size="sm" className="gap-2 text-xs rounded-xl">
-          <Download className="w-4 h-4" /> Export Excel
+        <Button variant="outline" size="sm" className="gap-2 text-xs rounded-xl print-visible" onClick={() => {
+          toast.success('Mempersiapkan rekap payroll PDF...', {
+            description: 'Gunakan dialog cetak browser dan pilih "Simpan sebagai PDF" (Save as PDF).',
+          });
+          setTimeout(() => {
+            window.print();
+          }, 500);
+        }}>
+          <Download className="w-4 h-4" /> Export PDF
         </Button>
         <Button size="sm" className="gap-2 text-xs rounded-xl bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 text-white cursor-pointer btn-premium shadow-lg shadow-emerald-500/20" onClick={handleGeneratePayroll}>
           <Wallet className="w-4 h-4" /> Generate Payroll
