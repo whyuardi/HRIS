@@ -584,10 +584,22 @@ export default function EmployeesPage() {
             </DialogContent>
           </Dialog>
 
-          {/* Export Button */}
-          <Button variant="outline" size="sm" className="gap-2 text-xs rounded-xl" onClick={handleExportCSV}>
-            <Download className="w-4 h-4" /> Export CSV
-          </Button>
+          {/* Export Buttons */}
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" className="gap-2 text-xs rounded-xl" onClick={handleExportCSV}>
+              <Download className="w-4 h-4" /> Export CSV
+            </Button>
+            <Button variant="outline" size="sm" className="gap-2 text-xs rounded-xl print-visible" onClick={() => {
+              toast.success('Mempersiapkan daftar karyawan PDF...', {
+                description: 'Gunakan dialog cetak browser dan pilih "Simpan sebagai PDF" (Save as PDF).',
+              });
+              setTimeout(() => {
+                window.print();
+              }, 500);
+            }}>
+              <Download className="w-4 h-4" /> Export PDF
+            </Button>
+          </div>
 
           {/* Add Dialog */}
           <Dialog open={isAddDialogOpen} onOpenChange={(o) => { setIsAddDialogOpen(o); if (!o) { setFormData({ ...emptyForm }); setFormErrors({}); } }}>

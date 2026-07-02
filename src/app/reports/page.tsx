@@ -39,17 +39,28 @@ const latenessTrend = monthlyAttendanceStats.map(d => ({
   target: 3,
 }));
 
+import { toast } from 'sonner';
+
 export default function ReportsPage() {
+  const handleExportPDF = () => {
+    toast.success('Mempersiapkan dokumen PDF...', {
+      description: 'Gunakan dialog cetak browser dan pilih "Simpan sebagai PDF" (Save as PDF).',
+    });
+    setTimeout(() => {
+      window.print();
+    }, 500);
+  };
+
   return (
     <div className="space-y-6">
       <PageHeader
         title="HR Reporting"
         description="Laporan dan analitik sumber daya manusia"
       >
-        <Button variant="outline" size="sm" className="gap-2 text-xs">
+        <Button variant="outline" size="sm" className="gap-2 text-xs print-visible" onClick={handleExportPDF}>
           <Download className="w-4 h-4" /> Export PDF
         </Button>
-        <Button size="sm" className="gap-2 text-xs bg-green-600 hover:bg-green-700 text-white">
+        <Button size="sm" className="gap-2 text-xs bg-emerald-600 hover:bg-emerald-700 text-white" onClick={() => toast.success('Analisis laporan diperbarui!')}>
           <FileBarChart className="w-4 h-4" /> Generate Laporan
         </Button>
       </PageHeader>

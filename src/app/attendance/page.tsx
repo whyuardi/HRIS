@@ -174,8 +174,15 @@ export default function AttendancePage() {
         title="Absensi"
         description="Monitoring & pencatatan kehadiran karyawan hari ini"
       >
-        <Button variant="outline" size="sm" className="gap-2 text-xs">
-          <Download className="w-4 h-4" /> Export
+        <Button variant="outline" size="sm" className="gap-2 text-xs print-visible" onClick={() => {
+          toast.success('Mempersiapkan rekap absensi PDF...', {
+            description: 'Gunakan dialog cetak browser dan pilih "Simpan sebagai PDF" (Save as PDF).',
+          });
+          setTimeout(() => {
+            window.print();
+          }, 500);
+        }}>
+          <Download className="w-4 h-4" /> Export PDF
         </Button>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger className="inline-flex items-center justify-center gap-2 rounded-xl text-xs font-semibold h-9 px-4 bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 text-white transition-all duration-200 btn-premium cursor-pointer shadow-lg shadow-emerald-500/20">
